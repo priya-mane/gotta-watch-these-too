@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.js"></script>
+    
+    <meta charset="UTF-8">
+    <title>Movies Recommender</title>
+
+    <style>
+        .card{
+            width:300px;
+            height:500px;
+            border: 2px;
+            border-style: solid;
+            margin: 5px;
+            border-radius: 15px;
+        }
+        .card-img-top{
+            width: 100%;
+            height: 70%;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+        .card-body{
+            width:100%;
+            height: 30%;
+            padding: 10px;
+        }
+        .card-title{
+            width: 100%;
+            height: fit-content;
+            text-align: center;
+            font-size: 2.5vh;
+            font-weight: bold;
+
+        }
+        .card-text{
+            width: 100%;
+            height: 80%;
+            overflow: auto;
+            
+        }
+    </style>
+    
+</head>
+<body>
+<br>
+<h2 style="text-align:center">MOVIES RECOMMENDER SYSTEM</h2>
+
+<h4 style="text-align: center;">Choose movies you like from below and get recommendations based on your choice</h4>
+
+<div style="padding: 40px;">
+    <select class="selectpicker form-control" id="user_movie_data" data-size="7" data-live-search="true" name= movies >
+    <option value="" disabled selected >Select a movie from the options below</option>
+    {% for movie in movies %}
+    <option value= "{{ movie }}" >{{ movie }}</option>"
+    {% endfor %}
+</select>
+</div>
+
+
+<h3 id="suggest" style="text-align: center;"></h3>
+
+<div id="recommendations-div" style="display: flex; flex-wrap: wrap;padding: 40px;">
+
+</div>
+
+<script>
+    document.getElementById('user_movie_data').onchange = function() {
+    var user_movie = this.value;
+    var csrf_token = "{{ csrf_token() }}";
+
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrf_token);
+            }
+        }
+    });
+
+    $.ajax({
+        type: 'POST',
+        data: JSON.stringify({
+            'user_movie': user_movie,
+        }),
+        contentType: 'application/json; charset=utf-8',
+        url: "{{ url_for('get_recommendations') }}",
+        success: function(data) {
+            var data_json = JSON.parse(data);
+
+            var main_div = document.getElementById("recommendations-div");
+            main_div.innerHTML = "";
+
+            document.getElementById("suggest").innerHTML = "You may also like...."
+            for (var key in data_json) {
+                if (data_json.hasOwnProperty(key)) {
+                    var val = data_json[key];
+
+                    var title = val['title'];
+                    var overview = val['overview'];
+                    var poster = val['poster'].replace(/\s/g, "");
+                    if (poster=="https://ibb.co/zmTCCqg")
+                    {
+                        poster = "static/movie_poster.jpg";
+                    }
+
+                    var movie_div = document.createElement("div"); 
+                    movie_div.setAttribute('class', 'card');   
+
+                    var title_div = document.createElement("div"); 
+                    title_div.setAttribute('class','card-title');
+
+                    var overview_div = document.createElement("div"); 
+                    overview_div.setAttribute('class','card-text');
+
+                    var poster_div = document.createElement("img"); 
+                    poster_div.setAttribute('class','card-img-top');
+
+                    var body = document.createElement("div");
+                    body.setAttribute('class','card-body');
+
+                    body.appendChild(title_div);
+                    body.appendChild(overview_div);
+
+                    movie_div.appendChild(poster_div);
+                    movie_div.appendChild(body);
+
+                    title_div.innerHTML  += title;
+                    poster_div.src = poster;
+                    overview_div.innerHTML += overview;
+
+
+                    console.log(title);
+                    console.log(poster);
+
+                    main_div.appendChild(movie_div);
+                    }
+                }
+            
+        }
+    });
+}
+</script>
+
+</body>
+</html>
