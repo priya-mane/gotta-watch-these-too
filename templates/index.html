@@ -35,7 +35,7 @@
             width: 100%;
             height: fit-content;
             text-align: center;
-            font-size: 2.5vh;
+            font-size: 1.5vw;
             font-weight: bold;
 
         }
@@ -43,7 +43,9 @@
             width: 100%;
             height: 80%;
             overflow: auto;
-            
+        }
+        .movie-selector{
+            padding: 40px;
         }
     </style>
     
@@ -54,7 +56,7 @@
 
 <h4 style="text-align: center;">Choose movies you like from below and get recommendations based on your choice</h4>
 
-<div style="padding: 40px;">
+<div class="movie-selector">
     <select class="selectpicker form-control" id="user_movie_data" data-size="7" data-live-search="true" name= movies >
     <option value="" disabled selected >Select a movie from the options below</option>
     {% for movie in movies %}
